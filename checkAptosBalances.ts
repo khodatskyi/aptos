@@ -17,7 +17,6 @@ interface receivedInfoAboutToken {
   coin_symbol: string;
   coin_decimals: number;
 }
-
 const aptosApiUrl = "https://public-api.aptoscan.com/v1/";
 const walletsFilePath = "./wallets.txt";
 
@@ -57,7 +56,7 @@ async function getAllTokensWithBalances(wallet: string): Promise<TokenWithBalanc
 
 function formatNumberWithComma(amount: number, digits: number): string {
   const amountStr = amount.toString();
-  const amountLength  = amountStr.length;
+  const amountLength = amountStr.length;
 
   if (digits < 0) {
     throw new Error("Digits should be non-negative.");
@@ -67,9 +66,7 @@ function formatNumberWithComma(amount: number, digits: number): string {
     return "0." + "0".repeat(digits - amountLength) + amountStr;
   } else {
     const pointIndex = amountLength - digits;
-    return (
-      amountStr.slice(0, pointIndex) + "." + amountStr.slice(pointIndex)
-    );
+    return amountStr.slice(0, pointIndex) + "." + amountStr.slice(pointIndex);
   }
 }
 
@@ -78,6 +75,10 @@ async function main() {
 
   for (const wallet of wallets) {
     const ArrayAllTokensWithBalances = await getAllTokensWithBalances(wallet);
+    // for(const coin of ArrayAllTokensWithBalances) {
+    //   console.log(coin);
+
+    // }
 
     console.log(`Wallet: ${wallet}`);
     console.log(`Tokens: ${JSON.stringify(ArrayAllTokensWithBalances)}`);
@@ -86,3 +87,24 @@ async function main() {
 }
 
 main().catch(console.error);
+
+
+getCoinsPrice();
+
+async function getCoinsPrice() {
+  const apiUrl = "https://api.coinlore.net/api/tickers/";
+  const tokensPrice: { [key: string]: string } = {};
+
+  try {
+    const response = await axios.get(apiUrl);
+    for (const token of response.data.data) {
+      tokensPrice[token.symbol] = token.price_usd;
+    }
+    console.log(tokensPrice);
+
+    return tokensPrice;
+  } catch (error) {
+    console.error("Error fetching coin prices:", error);
+    return null;
+  }
+}
