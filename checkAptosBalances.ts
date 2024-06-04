@@ -70,25 +70,8 @@ function formatNumberWithComma(amount: number, digits: number): string {
   }
 }
 
-async function main() {
-  const wallets = await getWallets();
-
-  for (const wallet of wallets) {
-    const ArrayAllTokensWithBalances = await getAllTokensWithBalances(wallet);
-    // for(const coin of ArrayAllTokensWithBalances) {
-    //   console.log(coin);
-
-    // }
-
-    console.log(`Wallet: ${wallet}`);
-    console.log(`Tokens: ${JSON.stringify(ArrayAllTokensWithBalances)}`);
-    console.log("-------------------------");
-  }
-}
-
-main().catch(console.error);
-
-async function getCoinsPrice(): Promise<void> {
+async function getCoinsPrice(): Promise<{ [key: string]: string; }> {
+  const tokensPrice: { [key: string]: string } = {};
   const apiUrlPage1 = "https://api.coinlore.net/api/tickers/";
   const apiUrlPage2 = "https://api.coinlore.net/api/tickers/?start=100&limit=100";
   const apiUrlPage3 = "https://api.coinlore.net/api/tickers/?start=200&limit=100";
@@ -108,8 +91,44 @@ async function getCoinsPrice(): Promise<void> {
         tokensPrice[token.symbol] = token.price_usd;
       }
     }
+    return tokensPrice
   } catch (error) {
     console.error("Error fetching coin prices:", error);
-    return null;
+    return tokensPrice
   }
 }
+
+async function main() {
+  const [wallets, tokensPrice] = await Promise.all([getWallets(), getCoinsPrice()]);
+  let totalBalance: number = 0;
+
+  const allBalancesPromises = wallets.map(wallet => getAllTokensWithBalances(wallet));
+  const allBalances = await Promise.all(allBalancesPromises);
+  
+  allBalances.forEach((ArrayWalletTokensWithBalances, index) => {
+    const wallet = wallets[index];
+    let walletTotal: number = 0;
+    
+    console.log(`Wallet ${index + 1}: ${wallet}`);
+    console.log(`Tokens:`);
+
+    ArrayWalletTokensWithBalances.forEach(coin => {
+      const coinPrice = Number(tokensPrice[coin.coin]) || 0;
+      const coinValue = coinPrice * Number(coin.amount);
+
+      walletTotal += coinValue;
+
+      console.log(`${coin.coin} - ${coin.amount} | $${coinValue.toFixed(2)}`);
+    });
+
+    totalBalance += walletTotal;
+
+    console.log(`Total amount money on wallet ${index + 1}: $${walletTotal.toFixed(2)}`);
+    console.log("-------------------------");
+  });
+
+  console.log(`Total amount money on ${wallets.length} wallets: $${totalBalance.toFixed(2)}`);
+  console.log("-------------------------");
+}
+
+main().catch(console.error);
