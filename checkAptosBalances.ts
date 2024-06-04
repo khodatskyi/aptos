@@ -88,21 +88,26 @@ async function main() {
 
 main().catch(console.error);
 
-
-getCoinsPrice();
-
-async function getCoinsPrice() {
-  const apiUrl = "https://api.coinlore.net/api/tickers/";
-  const tokensPrice: { [key: string]: string } = {};
+async function getCoinsPrice(): Promise<void> {
+  const apiUrlPage1 = "https://api.coinlore.net/api/tickers/";
+  const apiUrlPage2 = "https://api.coinlore.net/api/tickers/?start=100&limit=100";
+  const apiUrlPage3 = "https://api.coinlore.net/api/tickers/?start=200&limit=100";
 
   try {
-    const response = await axios.get(apiUrl);
-    for (const token of response.data.data) {
-      tokensPrice[token.symbol] = token.price_usd;
-    }
-    console.log(tokensPrice);
+    console.log("Let's find out the price of tokens");
 
-    return tokensPrice;
+    const [response1, response2, response3] = await Promise.all([
+      axios.get(apiUrlPage1),
+      axios.get(apiUrlPage2),
+      axios.get(apiUrlPage3),
+    ]);
+
+    const responses = [response1, response2, response3];
+    for (const response of responses) {
+      for (const token of response.data.data) {
+        tokensPrice[token.symbol] = token.price_usd;
+      }
+    }
   } catch (error) {
     console.error("Error fetching coin prices:", error);
     return null;
