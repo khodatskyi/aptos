@@ -46,9 +46,21 @@ Make sure you have Node.js and npm installed on your machine. You can download N
 After running the script, you should see output similar to this:
 
 ```
-Wallet: 0x7fd6eb5192154a6...
-Tokens: [{"coin":"Cake","amount":"0.06674855"},{"coin":"APT","amount":"1.04036996"},{"coin":"FOMO","amount":"10.000000"},{"coin":"tAPT","amount":"0.01814016"},{"coin":"$APT","amount":"1043.000000"}]
+Wallet 1: 0x8f95cca3196e508f16de7b1d6b9a522addf9e6488a87b34b94a45414b5905ff8
+Tokens:
+USDC - 0.091120 | $0.09
+APT - 1.05186283 | $9.71
+FOMO - 10.000000 | $0.00
+$APT - 1043.000000 | $0.00
+Total amount money on wallet 1: $9.80
 ```
+
+At the end, you should see
+
+```
+Total amount money on X wallets: $93.94
+```
+
 
 ## Notes
 
